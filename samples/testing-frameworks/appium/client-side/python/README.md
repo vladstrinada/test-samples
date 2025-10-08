@@ -14,11 +14,23 @@ For more detailed guides on Appium please refer to their
 
 ## Uploading Your App To Cloud
 
-Uploading an app is easiest using the `upload.py` script and using
-apiKey identification. The apiKey is found under "My Account" in
-Bitbar cloud. For the upload to be successful the full path to the
-app (apk or ipa) needs to be provided.
+There are few ways to upload an app to BitBar.
 
+### Using upload.py
+Uploading an app is easiest using the `upload.py` script.
+
+To use `upload.py`, there have to be `requests` package installed.
+The best way to do so, it to install all packages from `python3-requirements.txt` file, 
+as they will be needed in the next steps.
+
+```bash
+$ python3 -m pip install -r python3-requirements.txt
+```
+
+Next you can run `upload.py` script and using apiKey identification. 
+The apiKey is found under "My Account" in Bitbar cloud. 
+For the upload to be successful the full path to the
+app (apk or ipa) needs to be provided.
 If no app is provided on command line, then the Bitbar Sample Android app is
 uploaded.
 
@@ -29,12 +41,12 @@ $ python upload.py -h
 usage: upload.py [-h] [-k APIKEY] [-a APP_PATH] [-u URL]
 ```
 
-optional arguments:
+Optional arguments:
 
 ```bash
   -h, --help            show this help message and exit
   -k APIKEY, --apikey APIKEY
-                        User's apiKey to identify to cloud, or set environment
+                        User apiKey to identify to cloud, or set environment
                         variable BITBAR_APIKEY
   -a APP_PATH, --app_path APP_PATH
                         Path to app to upload or set environment variable
@@ -45,15 +57,52 @@ optional arguments:
                         'https://cloud.bitbar.com/api/v2/me/files'
 ```
 
-The below example shows how to upload a hybrid Android demo app to Bitbar Cloud.
+The below example shows how to upload an Android demo app to Bitbar Cloud.
 
 ```bash
-$ python upload.py -k xg8x...YXto -a ../../../../../apps/android/bitbar-sample-app.apk
+$ python upload.py -k api123key456to789bitbar0 -a ../../../../../apps/android/bitbar-sample-app.apk -u https://cloud.bitbar.com/api/v2/me/files
+
 File id to use in Bitbar capabilities in your test: 127314812
 ```
 
-The response message provides the application's cloud id that
-should be used with `bitbar_app` capability.
+The response message provides the application's cloud id that should be used with `bitbar_app` capability.
+
+### Use curl method:
+
+This method does not support any default BitBar url or default application
+so stick to the example as close as possible.
+
+needed arguments:
+
+```bash
+  -u                    User apiKey to identify to cloud. 
+                        The colon ':' indicates an empty password, keep it.
+  -F                    Uploads the file from given path.
+                        Paste path to application after '@'.
+  jq '.id'              Parses the JSON response and extracts the id of the uploaded file.
+```
+
+The below example shows how to upload an Android demo app to Bitbar Cloud.
+
+```bash
+$ curl -X POST \
+  -u "api123key456to789bitbar0:" \
+  -F 'file=@./bitbar-sample-app.apk' \
+  "https://cloud.bitbar.com/api/v2/me/files" | jq '.id'
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 1559k    0   518  100 1558k    441  1328k  0:00:01  0:00:01 --:--:-- 1329k
+127314812
+```
+
+### Upload file through the website
+
+Go to https://cloud.bitbar.com, 
+click the folder icon on the right side of the header to go to the Files Library, 
+and upload files in there.
+
+ID will be visible in the application tile.
 
 ## Common Settings in Example Tests
 
@@ -63,44 +112,30 @@ needs to have the following values set as environment variables or set
 in the files. Values can also be given as command line parameters to
 `run-test.py` script.
 
-### Values used in tests:
-
-* *screenshot_dir* - where should screenshots be stored on your local drive
-
-* *bitbar_username* - your email that you registered with to
-   Bitbar cloud.  **Rather use bitbar_apiKey.**
-
-* *bitbar_password* - your Bitbar cloud password. **Rather use bitbar_apiKey.**
-
-* *bitbar_apiKey* - a personal unique key allowing you to connect
-   to Bitbar cloud without using username and passwords in
-   tests. Api key is found under "My account" in [Bitbar cloud](https://cloud.bitbar.com/) UI.
-
-* *bitbar_project* - the project name in Bitbar cloud. Each
-  project's name is unique. A project's name can be modified later on if needed.
-
-* *bitbar_testrun* - name of this test run inside of
-  `bitbar_project`. Each test run can have the same name, but it is
-  recommended to set it dynamically (e.g. with timestamp or device
-  name). If no test run name is given, the system automatically names
-  it in "Test Run x".
-
-* *bitbar_app* - id of the app uploaded using `upload.py`
-  script or path for downloading an application. Example id could be '127314812'.
-* *bitbar_biometricInstrumentation* - boolean value, that informs whether
-  biometry should be injected or not.
-
-### `run-test.py` paramaters:
-
+### `run-test.py` required parameters:
 ```
-  -h, --help            show this help message and exit
   -k APIKEY, --apikey APIKEY
                         User's apiKey to identify to cloud
   -s SCREENSHOT_DIR, --screenshot_dir SCREENSHOT_DIR
                         Path to screenshot directory
-  -t {bitbar_chrome,bitbar_android,bitbar_safari,bitbar_ios,bitbar_biometrics_ios,bitbar_biometrics_android}, --test {bitbar_chrome,bitbar_android,bitbar_safari,bitbar_ios,bitbar_biometrics_ios,bitbar_biometrics_android}
-                        The test file to be run
-  -a APP, --app APP     Id of app uploaded to cloud using upload.py script or path for downloading an app. Mandatory for app testing
+  -t, --test            The test file to be run, choose one of the below:
+                        bitbar_chrome, bitbar_android, bitbar_safari, bitbar_ios, bitbar_biometrics_android, bitbar_biometrics_ios
+```
+### `run-test.py` parameters required in some cases:
+```
+  -a APP, --app APP     Mandatory for app testing, both android native and ios native.  
+                        Id of app uploaded to cloud (instruction on how to get the Id in Uploading Your App To Cloud part),
+                        or path for downloading an app.
+  -u URL, --url URL     Mandatory for environments different than https://cloud.bitbar.com
+                        Bitbar url where test project and devices are found
+  -i APPIUM_URL, --appium_url APPIUM_URL
+                        Mandatory for environments different than https://cloud.bitbar.com
+                        May be used to find devices from certain localisations.
+                        Bitbar Appium url
+```
+### `run-test.py` optional parameters:
+```
+  -h, --help            show help message and exit
   --device DEVICE       Full name of device to use
   --device_group_id DEVICE_GROUP_ID
                         The id of the Bitbar device group from where available devices are to be searched from
@@ -108,15 +143,17 @@ in the files. Values can also be given as command line parameters to
                         The name of the cloud project
   -r RUN_NAME, --run_name RUN_NAME
                         The name of the test run
-  -u URL, --url URL     Bitbar url where test project and devices are found
-  -i APPIUM_URL, --appium_url APPIUM_URL
-                        Bitbar Appium url
-  --bundle_id BUNDLE_ID
-                        Mandatory bundleID when running iOS tests
   --app_package APP_PACKAGE
-                        Mandatory app package path for native Android tests
+                        May be used for native Android tests.
+                        App package path.
+                        Default app_package corresponds with sample application bitbar-sample-app.apk
   --app_activity APP_ACTIVITY
-                        Mandatory main activity for native Android tests
+                        May be used for native Android tests,
+                        Main activity.
+                        Default app_activity corresponds with sample application bitbar-sample-app.apk
+  --bundle_id BUNDLE_ID
+                        May be used when running iOS native tests.
+                        Default bundleID corresponds with sample application bitbar-ios-sample.ipa
   --cmd_timeout CMD_TIMEOUT
                         New command timeout value, default is 60s
   --test_timeout TEST_TIMEOUT
@@ -128,8 +165,10 @@ in the files. Values can also be given as command line parameters to
 Remember to download pip packages listed in `python3-requirements.txt`:
 
 ```bash
-python3 -m pip install -r python3-requirements.txt
+$ python3 -m pip install -r python3-requirements.txt
 ```
+
+An example run of a native ios application. Using only required parameters and id of already uploaded application.
 
 ```bash
 $ python run-test.py -k xYY5...PeOA6 -s ./screenshots -p "iOS" -t bitbar_ios -a "127314812"
@@ -160,7 +199,7 @@ ok
 
 ```
 
-## Native iOS Example
+### Native iOS Example
 
 Example script: `bitbar_ios.py`
 
@@ -168,13 +207,13 @@ To run iOS native app tests additional parameter is required to be provided:
 
 * **bundleId** - this is your application's unique name
 
+This parameter is not needed if running against the sample BitbarIOSSample.ipa application, as it's set inside the sample script.
+
 ```bash
-$ python run-test.py -k xYY5...PeOA6 -s ./screenshots -p "iOS" -r `date +%R` -a "127314812" --bundle_id "com.bitbar.testdroid.BitbarIOSSample" -t bitbar_ios  
+$ python run-test.py -k api123key456to789bitbar0 -s ./screenshots -t bitbar_ios -a "127314812" -u https://cloud.bitbar.com -i https://eu-mobile-hub.bitbar.com/wd/hub -p "iOS Native" -r `date +%R`
 ```
 
-This parameter is not needed if running against the sample BitbarIOSSample.ipa application, as it's set inside of the sample script.
-
-## Native Android Example
+### Native Android Example
 
 Example script: `bitbar_android.py`
 
@@ -184,30 +223,30 @@ following additional information:
 * **app_package** - Java package of the Android app you want to run
 
 * **app_activity** - activity name for the Android activity you want to
-  launch from your package. Typically this is the main activity.
+  launch from your package. Typically, this is the main activity.
 
-For running the sample applications and tests these do not need to be set as they are set inside of the sample scripts if no parameter is given.
+For running the sample applications and tests these do not need to be set as they are set inside the sample scripts if no parameter is given.
 
 ```bash
-python run-test.py -k xYY5...PeOA6 -s ./screenshots -a '127314812' -p "Android Native" -r  `date +%R` -t bitbar_android
+$ python run-test.py -k api123key456to789bitbar0 -s ./screenshots -t bitbar_android -a '127314812' -u https://cloud.bitbar.com -i https://eu-mobile-hub.bitbar.com/wd/hub -p "Android Native" -r  `date +%R`
 ```
 
-## Safari Browser Testing
+### Safari Browser Testing
 
 Does not need any specific settings.
 
 Example: `bitbar_safari.py`
 
 ```bash
-python run-test.py -k xYY5hc8PXAXsBBd1G3ijnb18wlqPeOA6 -s ./screenshots -t bitbar_safari -p "Safari browser"  -r `date +%R`
+$ python run-test.py -k api123key456to789bitbar0 -s ./screenshots -t bitbar_safari -u https://cloud.bitbar.com -i https://eu-mobile-hub.bitbar.com/wd/hub -p "Safari browser"  -r `date +%R`
 ```
 
-## Chrome Browser Testing
+### Chrome Browser Testing
 
 Does not need any special settings.
 
 Example: `bitbar_chrome.py`
 
 ```bash
-python run-test.py -k xYY5hc8PXAXsBBd1G3ijnb18wlqPeOA6 -s ./screenshots -t bitbar_chrome -p "Chrome browser"  -r `date +%R`
+$ python run-test.py -k api123key456to789bitbar0 -s ./screenshots -t bitbar_chrome -u https://cloud.bitbar.com -i https://eu-mobile-hub.bitbar.com/wd/hub -p "Chrome browser"  -r `date +%R`
 ```
