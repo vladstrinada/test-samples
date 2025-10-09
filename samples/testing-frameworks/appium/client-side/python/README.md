@@ -1,12 +1,12 @@
 # Appium Client Side Python Samples
 
-Bitbar can be used to run Appium tests against real devices to test
+BitBar can be used to run Appium tests against real devices to test
 native Android or iOS applications, hybrid (Android & iOS) or for web
 testing (Safari on iOS and Chrome on Android).
 
 You'll find here all steps you need to start running your mobile tests
-against real devices in Bitbar. Before continuing with running these
-scripts you should register with [Bitbar
+against real devices in BitBar. Before continuing with running these
+scripts you should register with [BitBar
 service](https://cloud.bitbar.com/).
 
 For more detailed guides on Appium please refer to their
@@ -28,13 +28,13 @@ $ python3 -m pip install -r python3-requirements.txt
 ```
 
 Next you can run `upload.py` script and using apiKey identification. 
-The apiKey is found under "My Account" in Bitbar cloud. 
+The apiKey is found under "My Account" in BitBar cloud. 
 For the upload to be successful the full path to the
 app (apk or ipa) needs to be provided.
-If no app is provided on command line, then the Bitbar Sample Android app is
+If no app is provided on command line, then the BitBar Sample Android app is
 uploaded.
 
-Upload a mobile app to Bitbar cloud and get a handle to it
+Upload a mobile app to BitBar cloud and get a handle to it
 
 ```bash
 $ python upload.py -h
@@ -52,37 +52,37 @@ Optional arguments:
                         Path to app to upload or set environment variable
                         BITBAR_APP_PATH. Current value is:
                         '../../../../../apps/android/testdroid-sample-app.apk'
-  -u URL, --url URL     Bitbar cloud url to upload app or set environment
+  -u URL, --url URL     BitBar cloud url to upload app or set environment
                         variable BITBAR_UPLOAD_URL. Current value is:
                         'https://cloud.bitbar.com/api/v2/me/files'
 ```
 
-The below example shows how to upload an Android demo app to Bitbar Cloud.
+The below example shows how to upload an Android demo app to BitBar Cloud.
 
 ```bash
 $ python upload.py -k api123key456to789bitbar0 -a ../../../../../apps/android/bitbar-sample-app.apk -u https://cloud.bitbar.com/api/v2/me/files
 
-File id to use in Bitbar capabilities in your test: 127314812
+File id to use in BitBar capabilities in your test: 127314812
 ```
 
-The response message provides the application's cloud id that should be used with `bitbar_app` capability.
+The response message provides the application's cloud ID that should be used with `bitbar_app` capability.
 
 ### Use curl method:
 
 This method does not support any default BitBar url or default application
 so stick to the example as close as possible.
 
-needed arguments:
+Needed arguments:
 
 ```bash
   -u                    User apiKey to identify to cloud. 
                         The colon ':' indicates an empty password, keep it.
   -F                    Uploads the file from given path.
                         Paste path to application after '@'.
-  jq '.id'              Parses the JSON response and extracts the id of the uploaded file.
+  jq '.id'              Parses the JSON response and extracts the ID of the uploaded file.
 ```
 
-The below example shows how to upload an Android demo app to Bitbar Cloud.
+The below example shows how to upload an Android demo app to BitBar Cloud.
 
 ```bash
 $ curl -X POST \
@@ -123,22 +123,22 @@ in the files. Values can also be given as command line parameters to
 ```
 ### `run-test.py` parameters required in some cases:
 ```
-  -a APP, --app APP     Mandatory for app testing, both android native and ios native.  
-                        Id of app uploaded to cloud (instruction on how to get the Id in Uploading Your App To Cloud part),
+  -a APP, --app APP     Mandatory for app testing, both android native and iOS native.  
+                        Id of app uploaded to cloud (instruction on how to get the ID in Uploading Your App To Cloud part),
                         or path for downloading an app.
   -u URL, --url URL     Mandatory for environments different than https://cloud.bitbar.com
-                        Bitbar url where test project and devices are found
+                        BitBar url where test project and devices are found
   -i APPIUM_URL, --appium_url APPIUM_URL
                         Mandatory for environments different than https://cloud.bitbar.com
                         May be used to find devices from certain localisations.
-                        Bitbar Appium url
+                        BitBar Appium url
 ```
 ### `run-test.py` optional parameters:
 ```
   -h, --help            show help message and exit
   --device DEVICE       Full name of device to use
   --device_group_id DEVICE_GROUP_ID
-                        The id of the Bitbar device group from where available devices are to be searched from
+                        The ID of the BitBar device group from where available devices are to be searched from
   -p PROJECT, --project PROJECT
                         The name of the cloud project
   -r RUN_NAME, --run_name RUN_NAME
@@ -168,7 +168,7 @@ Remember to download pip packages listed in `python3-requirements.txt`:
 $ python3 -m pip install -r python3-requirements.txt
 ```
 
-An example run of a native ios application. Using only required parameters and id of already uploaded application.
+An example run of a native iOS application. Using only required parameters and ID of already uploaded application.
 
 ```bash
 $ python run-test.py -k xYY5...PeOA6 -s ./screenshots -p "iOS" -t bitbar_ios -a "127314812"
